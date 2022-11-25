@@ -1,0 +1,9 @@
+.initial-node {
+    width: 107px;
+    height: 42px;
+    background: #6FCF97;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}

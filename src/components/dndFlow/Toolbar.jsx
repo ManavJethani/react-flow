@@ -15,6 +15,9 @@ export default () => {
       <div className="dndnode" onDragStart={(event) => onDragStart(event, 'listen')} draggable>
         Listen
       </div>
+      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'intentModel')} draggable>
+        Intent Model
+      </div>
     </aside>
   );
 };

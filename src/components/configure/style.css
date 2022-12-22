@@ -1,0 +1,30 @@
+.drawer-title {
+    padding: 8px 10px;
+    background: #F3F8FF;
+    font-size: 20px;
+}
+
+.action-btn-drawer-container {
+    padding: 20px;
+    text-transform: none;
+    display: flex;
+    justify-content: end;
+}
+
+.drawer-content {
+    flex: 1;
+    margin: 10px;
+}
+
+.text-field {
+    width: 100%;
+    margin: 20px 0px !important;
+}
+
+.cancel-btn {
+    margin-right: 10px !important;
+}
+
+button {
+    text-transform: none !important;
+}

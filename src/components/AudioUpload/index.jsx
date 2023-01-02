@@ -180,7 +180,7 @@ const AudioUpload = (props) => {
                     className="number-text"
                     label="Number"
                     placeholder="Enter Value"
-                    onChange={(e) => onNumberBlur(e, index)}
+                    onChange={(e) => onNumberChange(e, index)}
                     value={ele.number}
                   />
                 </>

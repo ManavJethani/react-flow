@@ -39,7 +39,7 @@ const CustomizedNode = ({ data }) => {
         switch (name) {
             case 'intentModel':
                 return (
-                    content.intents.map((ele, i) => {
+                    content.intents.length > 0 ? content.intents.map((ele, i) => {
                         return <div key={i} style={{ background: '#F2F2F2', margin: '1px 0px', padding: 12 }} ref={nodeRef}>
                             <div>{ele.intentName}</div>
                             <Handle
@@ -50,10 +50,21 @@ const CustomizedNode = ({ data }) => {
                                 style={{ top: positionHandle(i + 1) }}
 
                             /></div>
-                    })
+                    }) : <div style={{ background: '#F2F2F2', margin: '1px 0px', padding: 12 }} ref={nodeRef}>
+                        <div>Select Intent</div>
+                        <Handle
+                            key={`dnd_1`}
+                            type="source" //This is the handle type
+                            position={Position.Right} //Just changed this as it would be good to be in parallel with the target
+                            id={`dnd_1`}
+                            style={{ top: positionHandle(1) }}
+
+                        /></div>
                 )
             case 'audioUpload':
-                return <div style={{ background: '#F2F2F2', margin: '1px 0px', padding: 12 }}>Audio File.mp3</div>
+                return <div style={{ background: '#F2F2F2', margin: '1px 0px', padding: 12 }}>
+                    {content.selectedAudio && content.selectedAudio.length > 0 ? "Audio Added" : "Add Audio"}
+                </div>
             case 'listen':
                 return <div style={{ background: '#F2F2F2', margin: '1px 0px', padding: 12 }}>Connect to Intent Model</div>
             default:

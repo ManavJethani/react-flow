@@ -123,16 +123,7 @@ const DnDFlow = (props) => {
                     title: 'Intent Model',
                     content: {
                         intents: [
-                            {
-                                id: `int_` + id,
-                                intentName: 'Greeting Response - Good',
-                                utterances: ['Good', 'Great']
-                            },
-                            {
-                                id: `int__` + id,
-                                intentName: 'Greeting Response - Bad',
-                                utterances: ['Bad', 'Worse']
-                            }
+                            
                         ]
                     },
                     handleDelete,
@@ -205,7 +196,7 @@ const DnDFlow = (props) => {
         restoreFlow();
     }, [setNodes]);
 
-    console.log('check connect line type', MarkerType)
+    console.log('check node data', nodes)
 
     return (
         <>

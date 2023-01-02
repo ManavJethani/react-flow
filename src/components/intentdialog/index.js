@@ -18,22 +18,24 @@ function SimpleDialog(props) {
         <Dialog onClose={handleClose} open={open}
             sx={{
                 '& .MuiPaper-root': {
-                    width: 500,
-                    maxHeight: 500
+                    width: 800,
+                    maxHeight: 800
                 }
             }}
         >
             <DialogTitle>Add Intent</DialogTitle>
             <DialogContent>
                 <TextField label="Intent Name" value={props.currentIntent.intentName} fullWidth className='text-field' onChange={props.handleIntentName} />
-                <div className='utterance-container'>
-                    <TextField label="Utterances" fullWidth inputRef={props.utteranceRef} placeholder="Add sample phrases or words" />
-                    <Button onClick={props.addUtterance}>Add</Button>
+                <div>
+                    <TextField multiline rows={6} label="Utterances" fullWidth inputRef={props.utteranceRef} placeholder="Add sample phrases or words" />
+                    <div className='utterance-container'>
+                        <Button variant='contained' onClick={props.addUtterance}>Add</Button>
+                    </div>
                 </div>
-                {props.currentIntent.utterances.map((ele,index) => {
+                {props.currentIntent.utterances.map((ele, index) => {
                     return <div className='utterance-list' key={index}>
                         <span>{ele}</span>
-                        <ButtonBase onClick={()=>props.handleUtteranceDelete(ele)}>
+                        <ButtonBase onClick={() => props.handleUtteranceDelete(ele)}>
                             <DeleteOutlineIcon />
                         </ButtonBase>
                     </div>
@@ -42,7 +44,7 @@ function SimpleDialog(props) {
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>
                 <Button onClick={props.addIntent} autoFocus variant='contained'>
-                    Add
+                    Done
                 </Button>
             </DialogActions>
         </Dialog>

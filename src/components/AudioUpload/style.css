@@ -1,0 +1,8 @@
+.add-audio-btn-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.number-text {
+    margin-left: 10px !important;
+}

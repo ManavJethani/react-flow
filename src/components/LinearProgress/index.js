@@ -32,9 +32,7 @@ export default function FileProgress(props) {
 
     React.useEffect(() => {
         if (props.file) {
-            console.log('check timer in useffect', progress)
             if (progress !== 100) {
-                console.log('check timer in timer', progress)
                 setProgress((prevProgress) => prevProgress + 20);
             }
         }

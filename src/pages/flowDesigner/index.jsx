@@ -83,8 +83,6 @@ const FlowDesigner = () => {
         setSelectedAudio(audio)
     }
 
-    console.log('check settings for audio', selectedAudio)
-
     return (
         <>
             <SettingsDrawer

@@ -126,16 +126,6 @@ const AudioUpload = (props) => {
                     value={ele.audioName}
                     label="Select Audio"
                     onChange={(e) => handleOptionChange(e, index)}
-                    endAdornment={
-                      <Button
-                        position="end"
-                        disabled={!ele.audioName}
-                        className="delete-btn"
-                        onClick={(e) => handleNew(e, ele)}
-                      >
-                        <Edit size={10} style={{ marginRight: 20 }} />
-                      </Button>
-                    }
                   >
                     {props.audioLibrary?.map((element, index) => {
                       return (

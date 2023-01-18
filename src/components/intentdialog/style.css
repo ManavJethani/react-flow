@@ -1,13 +1,67 @@
 .utterance-container {
-    display: flex;
-    justify-content: right;
-    margin-top: 10px;
+  display: flex;
+  justify-content: right;
+  margin-top: 10px;
+  align-items: center;
 }
 
 .utterance-list {
-    padding: 15px 12px;
-    background: #F9F9F9;
-    margin: 10px 0px;
-    justify-content: space-between;
-    display: flex;
+  padding: 5px 12px;
+  background: #f9f9f9;
+  margin: 10px 0px;
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+}
+
+.tag-side-panel {
+  min-width: 20%;
+  border-left: 1px solid #bdbdbd;
+  margin-left: 20px;
+  max-width: 400px;
+}
+
+.intent-header {
+  color: white;
+  background-color: #1976d2;
+}
+
+.dialog-actions {
+  border-top: 1px solid #bdbdbd;
+  padding: 20px !important;
+}
+
+.dialog-container {
+  display: flex;
+  padding: 0px 24px !important;
+}
+
+.tag-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+}
+
+.tag-header {
+  padding: 20px;
+  font-size: 20px;
+}
+
+.tag-input-container {
+  display: flex;
+}
+
+.text-style { 
+  max-width: 150px;
+  margin-right: 20px;
+}
+
+.delete-tag {
+  padding: 0px;
+  min-width: 20px;
+  padding-left: 10px;
 }

@@ -15,6 +15,11 @@ const getAudioId = () => `audio_${++id}`;
 
 const AudioUpload = (props) => {
   const [open, setOpen] = React.useState(false);
+  const [file, setFile] = React.useState(null);
+
+  const addFile = (data) => {
+    setFile(data);
+  };
 
   React.useEffect(() => {
     if (props.selectedId?.content?.selectedAudio) {
@@ -88,6 +93,7 @@ const AudioUpload = (props) => {
     let audioLibCopy = [...props.audioLibrary];
     audioLibCopy.push(newAudio);
     setOpen(false);
+    setFile(null);
     props.updateAudioLibrary(audioLibCopy);
   };
 
@@ -111,6 +117,8 @@ const AudioUpload = (props) => {
         open={open}
         handleDialogClose={handleDialogClose}
         handleAddAudioFile={handleAddAudioFile}
+        addFile={addFile}
+        file={file}
       />
 
       {props.selectedAudio.map((ele, index) => {

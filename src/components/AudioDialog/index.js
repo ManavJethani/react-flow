@@ -58,12 +58,7 @@ function MyDropzone(props) {
 }
 
 function SimpleDialog(props) {
-  const { onClose, open } = props;
-  const [file, setFile] = React.useState(null);
-
-  const addFile = (data) => {
-    setFile(data);
-  };
+  const { onClose, open, file, addFile } = props;
 
   const handleClose = () => {
     onClose(false);
@@ -110,6 +105,8 @@ export default function AudioDialog(props) {
         open={props.open}
         onClose={props.handleDialogClose}
         handleAddAudioFile={props.handleAddAudioFile}
+        addFile={props.addFile}
+        file={props.file}
       />
     </div>
   );

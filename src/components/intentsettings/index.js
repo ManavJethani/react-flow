@@ -9,6 +9,8 @@ import "./style.css";
 import IntentDialog from "../intentdialog";
 import { Edit } from "@mui/icons-material";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import { cloneDeep } from "lodash";
+import { FLOW_DESIGN_CONSTANT } from "../../constants";
 
 let id = new Date();
 const getId = () => `${++id}`;
@@ -56,16 +58,51 @@ export default function IntentSettings(props) {
   const addUtterance = () => {
     if (utteranceRef.current.value) {
       let valueArr = utteranceRef.current.value.split("\n");
-      let filteringSpaces = valueArr.filter((ele) => ele !== "");
+      let newArray = [];
+      for (let i = 0; i < valueArr.length; i++) {
+        if (valueArr[i]) {
+          let newObject = {};
+          newObject.id = `uttr_` + getId();
+          newObject.name = valueArr[i];
+          newObject.tags = [];
+          newArray.push(newObject);
+        }
+      }
       setIntent((prev) => ({
         ...prev,
-        utterances: [...intent.utterances, ...filteringSpaces],
+        utterances: [...intent.utterances, ...newArray],
       }));
     }
   };
 
+  const handleAddTag = (value) => {
+    if (value.text) {
+      let indexValue = intent.utterances[value.index].tags.findIndex(
+        (ele) => ele.id === value.id
+      );
+      let intentCopy = cloneDeep(intent);
+      if (indexValue === -1) {
+        intentCopy.utterances[value.index].tags.push({
+          text: value.text,
+          tagName: "",
+          id: `tag_` + getId(),
+        });
+      }
+      setIntent(intentCopy);
+    }
+  };
+
+  const handleAttachTag = (e, id, index) => {
+    let indexValue = intent.utterances[index].tags.findIndex(
+      (ele) => ele.id === id
+    );
+    let intentCopy = cloneDeep(intent);
+    intentCopy.utterances[index].tags[indexValue].tagName = e.target.value;
+    setIntent(intentCopy);
+  };
+
   const addIntent = () => {
-    let updatedIntentList = [...props.intentLibrary];
+    let updatedIntentList = cloneDeep(props.intentLibrary);
     const i = updatedIntentList.findIndex(
       (_element) => _element.id === intent.id
     );
@@ -75,7 +112,6 @@ export default function IntentSettings(props) {
       updatedIntentList.push(intent);
     }
     props.updateIntentLibrary(updatedIntentList);
-    props.updateIntentList(updatedIntentList);
     handleDialogClose();
   };
 
@@ -89,7 +125,9 @@ export default function IntentSettings(props) {
   const handleUtteranceDelete = (item) => {
     setIntent((prev) => ({
       ...prev,
-      utterances: [...intent.utterances.filter((ele) => ele !== item)],
+      utterances: [
+        ...intent.utterances.filter((ele) => ele.name !== item.name),
+      ],
     }));
   };
 
@@ -107,26 +145,60 @@ export default function IntentSettings(props) {
     props.updateIntentList([...props.selectedIntent, newIntent]);
   };
 
+  const handleHighlightText = (e, ele, index) => {
+    if (ele.text && ele.tagName) {
+      let intentCopy = cloneDeep(intent);
+      if (intentCopy.utterances[index].highlightedText) {
+        intentCopy.utterances[index].highlightedText.push(ele.text);
+      } else {
+        intentCopy.utterances[index].highlightedText = [];
+        intentCopy.utterances[index].highlightedText.push(ele.text);
+      }
+      setIntent(intentCopy);
+    }
+  };
+
+  const handleTageDelete = (e, ele, index) => {
+    let removeTag = intent.utterances[index].tags.filter(
+      (tag) => tag.id !== ele.id
+    );
+    let removeHighlightedText = intent.utterances[
+      index
+    ].highlightedText?.filter((tag) => tag !== ele.text);
+    let intentCopy = cloneDeep(intent);
+    intentCopy.utterances[index].tags = removeTag;
+    intentCopy.utterances[index].highlightedText = removeHighlightedText;
+    setIntent(intentCopy);
+  };
+
   return (
     <>
-      <IntentDialog
-        open={open}
-        handleDialogClose={handleDialogClose}
-        selectedId={props.selectedId}
-        updateIntent={props.updateIntent}
-        currentIntent={intent}
-        addUtterance={addUtterance}
-        utteranceRef={utteranceRef}
-        handleIntentName={handleIntentName}
-        addIntent={addIntent}
-        handleUtteranceDelete={handleUtteranceDelete}
-      />
+      {open && (
+        <IntentDialog
+          open={open}
+          handleDialogClose={handleDialogClose}
+          selectedId={props.selectedId}
+          updateIntent={props.updateIntent}
+          currentIntent={intent}
+          addUtterance={addUtterance}
+          utteranceRef={utteranceRef}
+          handleIntentName={handleIntentName}
+          addIntent={addIntent}
+          handleUtteranceDelete={handleUtteranceDelete}
+          handleAddTag={handleAddTag}
+          handleAttachTag={handleAttachTag}
+          handleHighlightText={handleHighlightText}
+          handleTageDelete={handleTageDelete}
+        />
+      )}
       {props.selectedIntent.map((ele, index) => {
         return (
           <div>
             <Box sx={{ minWidth: 120, display: "flex", margin: "15px 0px" }}>
               <FormControl fullWidth>
-                <InputLabel id="select-intent">Select Intent</InputLabel>
+                <InputLabel id="select-intent">
+                  {FLOW_DESIGN_CONSTANT.SELECT_INENT}
+                </InputLabel>
                 <Select
                   labelId="select-intent"
                   id="select-intent"
@@ -153,7 +225,7 @@ export default function IntentSettings(props) {
                   })}
                   <MenuItem onClick={handleNew}>
                     <span style={{ color: "#1976d2", fontSize: 14 }}>
-                      + Add New
+                      {FLOW_DESIGN_CONSTANT.ADD_NEW}
                     </span>
                   </MenuItem>
                 </Select>
@@ -172,7 +244,7 @@ export default function IntentSettings(props) {
 
       <div className="add-intent-container">
         <Button onClick={handleAddNewIntent} fullWidth variant="contained">
-          Add Intent
+          {FLOW_DESIGN_CONSTANT.ADD_INTENT}
         </Button>
       </div>
     </>

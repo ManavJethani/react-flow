@@ -17,12 +17,12 @@ const FlowDesigner = () => {
     {
       id: getId(),
       intentName: "I am doing good",
-      utterances: ["good", "great"],
+      utterances: [{ name: "good" }, { name: "great" }],
     },
     {
       id: getId(),
       intentName: "Bad Experience",
-      utterances: ["Bad", "Worse"],
+      utterances: [{ name: "Bad" }, { name: "worse" }],
     },
   ]);
   const [audioLibrary, setAudioLibrary] = React.useState([

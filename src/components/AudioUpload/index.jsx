@@ -9,6 +9,7 @@ import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import React from "react";
 import "./style.css";
 import AudioDialog from "../AudioDialog";
+import { FLOW_DESIGN_CONSTANT } from "../../constants";
 
 let id = new Date();
 const getAudioId = () => `audio_${++id}`;
@@ -127,7 +128,9 @@ const AudioUpload = (props) => {
             <Box sx={{ minWidth: 120, display: "flex", margin: "15px 0px" }}>
               {ele.type === "audio" ? (
                 <FormControl fullWidth>
-                  <InputLabel id="select-audio">Select Audio</InputLabel>
+                  <InputLabel id="select-audio">
+                    {FLOW_DESIGN_CONSTANT.SELECT_AUDIO}
+                  </InputLabel>
                   <Select
                     labelId="select-audio"
                     id="select-intent"
@@ -144,7 +147,7 @@ const AudioUpload = (props) => {
                     })}
                     <MenuItem onClick={handleNew}>
                       <span style={{ color: "#1976d2", fontSize: 14 }}>
-                        + Add New
+                        {FLOW_DESIGN_CONSTANT.ADD_NEW}
                       </span>
                     </MenuItem>
                   </Select>
@@ -157,7 +160,9 @@ const AudioUpload = (props) => {
                       width: 100,
                     }}
                   >
-                    <InputLabel id="type">Type</InputLabel>
+                    <InputLabel id="type">
+                      {FLOW_DESIGN_CONSTANT.TYPE}
+                    </InputLabel>
                     <Select
                       labelId="type"
                       id="type"
@@ -195,8 +200,12 @@ const AudioUpload = (props) => {
         );
       })}
       <div className="add-audio-btn-container">
-        <Button onClick={handleAddNewAudio}>+ Add Audio file</Button>
-        <Button onClick={handleAddNumber}>+ Add Number</Button>
+        <Button onClick={handleAddNewAudio}>
+          {FLOW_DESIGN_CONSTANT.ADD_AUDIO_FILE}
+        </Button>
+        <Button onClick={handleAddNumber}>
+          {FLOW_DESIGN_CONSTANT.ADD_NUMBER}
+        </Button>
       </div>
     </div>
   );

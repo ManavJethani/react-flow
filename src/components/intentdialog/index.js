@@ -42,29 +42,26 @@ function SimpleDialog(props) {
   }, []);
 
   const getSelectedElement = React.useCallback(() => {
-    if (
-      props.currentIntent.utterances &&
-      props.currentIntent.utterances.length > 0
-    ) {
-      let dom = window.getSelection().getRangeAt(0)?.startContainer.parentNode
-        .parentNode.parentNode;
-      if (dom.getAttribute("name") === "uttr-list") {
-        let index = dom.getAttribute("index");
-        let value = window.getSelection().toString();
-        if (index !== selectedText.index && value) {
-          setSelectedText((prev) => ({
-            ...prev,
-            text: value,
-            index: index,
-          }));
-        }
+    let dom = window.getSelection().getRangeAt(0)?.startContainer.parentNode
+      .parentNode.parentNode;
+    if (dom.getAttribute("name") === "uttr-list") {
+      let index = dom.getAttribute("index");
+      let value = window.getSelection().toString();
+      if (index !== selectedText.index && value) {
+        setSelectedText((prev) => ({
+          ...prev,
+          text: value,
+          index: index,
+        }));
       }
     }
   }, [selectedText.index]);
 
   return (
     <Dialog onClose={handleClose} open={open} fullScreen>
-      <DialogTitle className="intent-header">{FLOW_DESIGN_CONSTANT.INTENT_SETTINGS}</DialogTitle>
+      <DialogTitle className="intent-header">
+        {FLOW_DESIGN_CONSTANT.INTENT_SETTINGS}
+      </DialogTitle>
       <DialogContent className="dialog-container">
         <div style={{ flex: 1 }}>
           <TextField
@@ -85,7 +82,7 @@ function SimpleDialog(props) {
             />
             <div className="utterance-container">
               <Button variant="contained" onClick={props.addUtterance}>
-              {FLOW_DESIGN_CONSTANT.ADD}
+                {FLOW_DESIGN_CONSTANT.ADD}
               </Button>
             </div>
           </div>

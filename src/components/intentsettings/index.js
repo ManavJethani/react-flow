@@ -68,9 +68,16 @@ export default function IntentSettings(props) {
           newArray.push(newObject);
         }
       }
+      let utterances = [...intent.utterances, ...newArray];
+      let uniqueUtterances = Array.from(
+        new Set(utterances.map((a) => a.name))
+      ).map((name) => {
+        return utterances.find((a) => a.name === name);
+      });
+      utteranceRef.current.value = "";
       setIntent((prev) => ({
         ...prev,
-        utterances: [...intent.utterances, ...newArray],
+        utterances: uniqueUtterances,
       }));
     }
   };

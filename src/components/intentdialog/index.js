@@ -21,7 +21,6 @@ const getId = () => `${++id}`;
 
 function SimpleDialog(props) {
   const { onClose, open } = props;
-  const [enableSelector, setEnableSelector] = React.useState(false);
   const [selectedText, setSelectedText] = React.useState({
     id: `tag_` + getId(),
     text: "",
@@ -33,6 +32,8 @@ function SimpleDialog(props) {
   const handleClose = () => {
     onClose(false);
   };
+
+  const [searchText, setSearchText] = React.useState("");
 
   React.useEffect(() => {
     document.addEventListener("mouseup", getSelectedElement);
@@ -56,6 +57,17 @@ function SimpleDialog(props) {
       }
     }
   }, [selectedText.index]);
+
+  const handleSearchInput = (e) => {
+    setSearchText(e.target.value);
+  };
+
+  const getIndex = (name) => {
+    let originalIndex = props.currentIntent.utterances.findIndex(
+      (ele) => ele.name === name
+    );
+    return originalIndex;
+  };
 
   return (
     <Dialog onClose={handleClose} open={open} fullScreen>
@@ -86,50 +98,71 @@ function SimpleDialog(props) {
               </Button>
             </div>
           </div>
-          {props.currentIntent.utterances.map((ele, index) => {
-            return (
-              <>
-                <div
-                  className="utterance-list"
-                  key={index}
-                  id={"utterance" + index}
-                >
-                  <span id={"uttr_name" + index} index={index} name="uttr-list">
-                    <Highlighter
-                      highlightClassName="YourHighlightClass"
-                      searchWords={
-                        ele.highlightedText ? ele.highlightedText : []
-                      }
-                      autoEscape={true}
-                      textToHighlight={ele.name}
-                    />
-                  </span>
-                  <div>
-                    <Button
-                      disabled={selectedText.index != index}
-                      sx={{
-                        color: "black",
-                        border: "1px solid",
-                        margin: "0px 10px",
-                      }}
-                      onClick={() => {
-                        setSelectedIndex(index);
-                        props.handleAddTag(selectedText);
-                      }}
-                      variant="outlined"
+          {props.currentIntent?.utterances?.length > 0 && (
+            <TextField
+              label="Search Utterance"
+              onChange={handleSearchInput}
+              value={searchText}
+            />
+          )}
+          {props.currentIntent.utterances
+            .filter((element) => {
+              if (searchText === "") {
+                return element;
+              } else if (
+                element.name.toLowerCase().includes(searchText.toLowerCase())
+              ) {
+                return element;
+              }
+            })
+            .map((ele, index) => {
+              return (
+                <>
+                  <div
+                    className="utterance-list"
+                    key={getIndex(ele.name)}
+                    id={"utterance" + getIndex(ele.name)}
+                  >
+                    <span
+                      id={"uttr_name" + getIndex(ele.name)}
+                      index={getIndex(ele.name)}
+                      name="uttr-list"
                     >
-                      {FLOW_DESIGN_CONSTANT.ADD_TAG}
-                    </Button>
-                    <ButtonBase
-                      onClick={() => props.handleUtteranceDelete(ele)}
-                    >
-                      <DeleteOutlineIcon />
-                    </ButtonBase>
+                      <Highlighter
+                        highlightClassName="YourHighlightClass"
+                        searchWords={
+                          ele.highlightedText ? ele.highlightedText : []
+                        }
+                        autoEscape={true}
+                        textToHighlight={ele.name}
+                      />
+                    </span>
+                    <div>
+                      <Button
+                        disabled={selectedText.index != getIndex(ele.name)}
+                        sx={{
+                          color: "black",
+                          border: "1px solid",
+                          margin: "0px 10px",
+                        }}
+                        onClick={() => {
+                          setSelectedIndex(getIndex(ele.name));
+                          props.handleAddTag(selectedText);
+                        }}
+                        variant="outlined"
+                      >
+                        {FLOW_DESIGN_CONSTANT.ADD_TAG}
+                      </Button>
+                      <ButtonBase
+                        onClick={() => props.handleUtteranceDelete(ele)}
+                      >
+                        <DeleteOutlineIcon />
+                      </ButtonBase>
+                    </div>
                   </div>
-                </div>
-              </>
-            );
-          })}
+                </>
+              );
+            })}
         </div>
         <div className="tag-side-panel">
           <div className="tag-header">
@@ -148,7 +181,11 @@ function SimpleDialog(props) {
                           props.handleAttachTag(e, ele.id, selectedIndex)
                         }
                         onBlur={(e) =>
-                          props.handleHighlightText(e, ele, selectedIndex)
+                          props.handleHighlightText(
+                            e,
+                            ele,
+                            selectedIndex
+                          )
                         }
                         label="Tag name"
                       />

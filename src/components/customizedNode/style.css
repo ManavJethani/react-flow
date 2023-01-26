@@ -54,3 +54,8 @@
   margin: 1px 0px;
   padding: 12px;
 }
+
+.select-intent-text {
+  text-decoration: underline;
+  cursor: pointer;
+}

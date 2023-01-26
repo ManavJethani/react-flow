@@ -63,7 +63,12 @@ const CustomizedNode = ({ data }) => {
           })
         ) : (
           <div className="node-body" ref={nodeRef}>
-            <div>{FLOW_DESIGN_CONSTANT.SELECT_INENT}</div>
+            <div
+              className="select-intent-text"
+              onClick={() => onConfigure(id, name, title, nodes, content)}
+            >
+              {FLOW_DESIGN_CONSTANT.SELECT_INENT}
+            </div>
             <Handle
               key={`dnd_1`}
               type="source" //This is the handle type
@@ -78,7 +83,7 @@ const CustomizedNode = ({ data }) => {
           <div className="node-body">
             {content.selectedAudio && content.selectedAudio.length > 0
               ? FLOW_DESIGN_CONSTANT.AUDIO_ADDED
-              : FLOW_DESIGN_CONSTANT.ADD_AUDIO}
+              : <div className="select-intent-text" onClick={() => onConfigure(id, name, title, nodes, content)}>{FLOW_DESIGN_CONSTANT.ADD_AUDIO}</div>}
           </div>
         );
       case "listen":

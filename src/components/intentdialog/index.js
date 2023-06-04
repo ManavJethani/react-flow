@@ -10,11 +10,13 @@ import {
   DialogContent,
   TextField,
   Typography,
+  FormControl,
+  MenuItem,
 } from "@mui/material";
 import "./style.css";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import Highlighter from "react-highlight-words";
 import { FLOW_DESIGN_CONSTANT } from "../../constants";
+import HighlightedText from "../highligher";
 
 let id = new Date();
 const getId = () => `${++id}`;
@@ -26,6 +28,7 @@ function SimpleDialog(props) {
     text: "",
     index: null,
   });
+  const [newTagFlag, setNewTagFlag] = React.useState(false);
 
   const [selectedIndex, setSelectedIndex] = React.useState(null);
 
@@ -35,28 +38,35 @@ function SimpleDialog(props) {
 
   const [searchText, setSearchText] = React.useState("");
 
-  React.useEffect(() => {
-    document.addEventListener("mouseup", getSelectedElement);
-    return () => {
-      document.removeEventListener("mouseup", getSelectedElement);
-    };
-  }, []);
+  const initializeSelected = () => {
+    setSelectedText({ id: `tag_` + getId(), text: "", index: null });
+  };
 
-  const getSelectedElement = React.useCallback(() => {
-    let dom = window.getSelection().getRangeAt(0)?.startContainer.parentNode
-      .parentNode.parentNode;
-    if (dom.getAttribute("name") === "uttr-list") {
-      let index = dom.getAttribute("index");
-      let value = window.getSelection().toString();
-      if (index !== selectedText.index && value) {
-        setSelectedText((prev) => ({
-          ...prev,
-          text: value,
-          index: index,
-        }));
+  // React.useEffect(() => {
+  //   document.addEventListener("mouseup", getSelectedElement);
+  //   return () => {
+  //     document.removeEventListener("mouseup", getSelectedElement);
+  //   };
+  // }, []);
+
+  const getSelectedElement = () => {
+    let selection = window.getSelection();
+    if (selection) {
+      let range = selection.getRangeAt(0);
+      let dom = range?.startContainer.parentNode;
+      if (dom.getAttribute("id") === "highlight-area") {
+        let value = window.getSelection().toString();
+        if (value) {
+          setSelectedText((prev) => ({
+            ...prev,
+            text: value,
+            startOffset: range.startOffset,
+            endOffset: range.endOffset,
+          }));
+        }
       }
     }
-  }, [selectedText.index]);
+  };
 
   const handleSearchInput = (e) => {
     setSearchText(e.target.value);
@@ -127,19 +137,16 @@ function SimpleDialog(props) {
                       id={"uttr_name" + getIndex(ele.name)}
                       index={getIndex(ele.name)}
                       name="uttr-list"
+                      className="uttr-list"
                     >
-                      <Highlighter
-                        highlightClassName="YourHighlightClass"
-                        searchWords={
-                          ele.highlightedText ? ele.highlightedText : []
-                        }
-                        autoEscape={true}
-                        textToHighlight={ele.name}
+                      <HighlightedText
+                        text={ele.name}
+                        offsets={ele.tags ? ele.tags : []}
                       />
                     </span>
                     <div>
                       <Button
-                        disabled={selectedText.index != getIndex(ele.name)}
+                        // disabled={selectedText.index != getIndex(ele.name)}
                         sx={{
                           color: "black",
                           border: "1px solid",
@@ -147,7 +154,8 @@ function SimpleDialog(props) {
                         }}
                         onClick={() => {
                           setSelectedIndex(getIndex(ele.name));
-                          props.handleAddTag(selectedText);
+                          initializeSelected();
+                          // props.handleAddTag(selectedText);
                         }}
                         variant="outlined"
                       >
@@ -168,41 +176,116 @@ function SimpleDialog(props) {
           <div className="tag-header">
             <Typography variant="h6">{FLOW_DESIGN_CONSTANT.TAG}</Typography>
           </div>
-          <div>
-            {props.currentIntent.utterances[selectedIndex]?.tags.map(
-              (ele, index) => {
-                return (
-                  <Box className="tag-container">
-                    <span className="text-style">{ele.text}</span>
-                    <div className="tag-input-container">
-                      <TextField
-                        value={ele.tagName ? ele.tagName : ""}
-                        onChange={(e) =>
-                          props.handleAttachTag(e, ele.id, selectedIndex)
-                        }
-                        onBlur={(e) =>
-                          props.handleHighlightText(
-                            e,
-                            ele,
-                            selectedIndex
-                          )
-                        }
-                        label="Tag name"
-                      />
-                      <Button
-                        onClick={(e) =>
-                          props.handleTageDelete(e, ele, selectedIndex)
-                        }
-                        className="delete-tag"
-                      >
-                        <DeleteOutlineIcon />
-                      </Button>
-                    </div>
-                  </Box>
-                );
-              }
-            )}
-          </div>
+          {selectedIndex !== null && (
+            <div>
+              <div
+                onMouseUp={getSelectedElement}
+                id="highlight-area"
+                className="highlight-area"
+              >
+                {props.currentIntent.utterances[selectedIndex]?.name}
+              </div>
+              <span style={{ fontSize: 12, color: "dimGray" }}>
+                select a word to add a tag
+              </span>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "end",
+                  margin: "10px 0px",
+                }}
+              >
+                <Button
+                  onClick={() => {
+                    setNewTagFlag(false);
+                    props.handleAddTag(selectedText, selectedIndex);
+                  }}
+                  variant="outlined"
+                  disabled={!selectedText.text}
+                >
+                  Attach Tag
+                </Button>
+              </div>
+              {props.currentIntent.utterances[selectedIndex]?.tags?.map(
+                (ele, index) => {
+                  return (
+                    <>
+                      <Box className="tag-container">
+                        <span className="text-style">{ele.text}</span>
+                        <div className="tag-input-container">
+                          {!ele.new ? (
+                            <FormControl className="tag-input">
+                              <TextField
+                                select
+                                labelId="predef-tags"
+                                id="predef-tags"
+                                label="Predefined Tag"
+                                onChange={(e) =>
+                                  props.handleAttachTag(
+                                    e,
+                                    ele.id,
+                                    selectedIndex
+                                  )
+                                }
+                                value={ele.tagName}
+                              >
+                                {props.predefinedTags?.map((element, index) => {
+                                  return (
+                                    <MenuItem
+                                      value={element.tagName}
+                                      key={index}
+                                    >
+                                      {element.tagName}
+                                    </MenuItem>
+                                  );
+                                })}
+
+                                <Button
+                                  onClick={(e) =>
+                                    props.handleAddNewTag(
+                                      e,
+                                      ele.id,
+                                      selectedIndex
+                                    )
+                                  }
+                                >
+                                  add new
+                                </Button>
+                              </TextField>
+                            </FormControl>
+                          ) : (
+                            <TextField
+                              placeholder="Type tag name here"
+                              onBlur={(e) =>
+                                props.handleAddToPredefinedTags(
+                                  e,
+                                  ele.id,
+                                  selectedIndex
+                                )
+                              }
+                              className="tag-input"
+                            />
+                          )}
+
+                          <Button
+                            onClick={(e) =>
+                              props.handleTageDelete(e, ele, selectedIndex)
+                            }
+                            className="delete-tag"
+                          >
+                            <DeleteOutlineIcon />
+                          </Button>
+                        </div>
+                      </Box>
+                    </>
+                  );
+                }
+              )}
+              {/* <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button onClick={() => setNewTagFlag(true)}>Add new tag</Button>
+              </div> */}
+            </div>
+          )}
         </div>
       </DialogContent>
       <DialogActions className="dialog-actions">
@@ -241,8 +324,12 @@ export default function IntentDialog(props) {
         handleUtteranceDelete={props.handleUtteranceDelete}
         handleAddTag={props.handleAddTag}
         handleAttachTag={props.handleAttachTag}
-        handleHighlightText={props.handleHighlightText}
+        // handleHighlightText={props.handleHighlightText}
         handleTageDelete={props.handleTageDelete}
+        utteranceDeleted={props.utteranceDeleted}
+        predefinedTags={props.predefinedTags}
+        handleAddNewTag={props.handleAddNewTag}
+        handleAddToPredefinedTags={props.handleAddToPredefinedTags}
       />
     </div>
   );

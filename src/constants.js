@@ -10,7 +10,7 @@ export const FLOW_DESIGN_CONSTANT = {
   ADD_INTENT: "Add Intent",
   INTENT_SETTINGS: "Intent Settings",
   ADD: "Add",
-  ADD_TAG: "Add Tag",
+  ADD_TAG: "Show/Add Tag",
   TAG: "Tag",
   DONE: "Done",
   AUDIO_ADDED: "Audio Added",

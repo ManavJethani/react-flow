@@ -9,11 +9,30 @@ import "./style.css";
 import IntentDialog from "../intentdialog";
 import { Edit } from "@mui/icons-material";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
-import { cloneDeep } from "lodash";
+import { cloneDeep, debounce } from "lodash";
 import { FLOW_DESIGN_CONSTANT } from "../../constants";
 
 let id = new Date();
 const getId = () => `${++id}`;
+
+function getRandomColor() {
+  const minIntensity = 150; // Minimum intensity for each RGB channel (0-255)
+
+  // Generate random RGB values within the minimum intensity range
+  const red =
+    Math.floor(Math.random() * (255 - minIntensity + 1)) + minIntensity;
+  const green =
+    Math.floor(Math.random() * (255 - minIntensity + 1)) + minIntensity;
+  const blue =
+    Math.floor(Math.random() * (255 - minIntensity + 1)) + minIntensity;
+
+  // Convert RGB values to hexadecimal color code
+  const colorCode = `#${red.toString(16)}${green.toString(16)}${blue.toString(
+    16
+  )}`;
+
+  return colorCode;
+}
 
 export default function IntentSettings(props) {
   const [intent, setIntent] = React.useState({
@@ -22,6 +41,21 @@ export default function IntentSettings(props) {
   });
   const [open, setOpen] = React.useState(false);
   const utteranceRef = React.useRef("");
+  const utteranceDeleted = React.useRef(false);
+  const [predefinedTags, setPredefinedTags] = React.useState([
+    {
+      tagName: "Time",
+      color: "yellow",
+    },
+    {
+      tagName: "Date",
+      color: "lightGreen",
+    },
+    {
+      tagName: "Action",
+      color: "pink",
+    },
+  ]);
 
   React.useEffect(() => {
     if (props.selectedId?.content?.intents) {
@@ -55,6 +89,7 @@ export default function IntentSettings(props) {
     setOpen(true);
   };
 
+  // adding new utterances
   const addUtterance = () => {
     if (utteranceRef.current.value) {
       let valueArr = utteranceRef.current.value.split("\n");
@@ -82,43 +117,125 @@ export default function IntentSettings(props) {
     }
   };
 
-  const handleAddTag = (value) => {
+  // check if word already been tagged using offsets
+  function isNumberInRange(number, min, max) {
+    return number >= min && number <= max;
+  }
+
+  // check if word already been tagged using offsets
+  function checkTagExist(tagArray, newTag) {
+    for (let i = 0; i < tagArray.length; i++) {
+      let inRange = isNumberInRange(
+        newTag.startOffset,
+        tagArray[i].startOffset,
+        tagArray[i].endOffset
+      );
+      if (inRange) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // adding a tag inside utterance
+  const handleAddTag = (value, index) => {
+    let intentCopy = cloneDeep(intent);
     if (value.text) {
-      let indexValue = intent.utterances[value.index].tags.findIndex(
+      if (!intent.utterances[index].tags) {
+        intentCopy.utterances[index].tags = [];
+      }
+      let indexValue = intentCopy.utterances[index].tags.findIndex(
         (ele) => ele.id === value.id
       );
-      let intentCopy = cloneDeep(intent);
-      if (indexValue === -1) {
-        intentCopy.utterances[value.index].tags.push({
-          text: value.text,
-          tagName: "",
-          id: `tag_` + getId(),
-        });
+
+      let tagsArray = intentCopy.utterances[index].tags;
+
+      let tagExist = checkTagExist(tagsArray, value);
+
+      if (tagExist) {
+        alert("tag already exist");
+      } else {
+        if (indexValue === -1) {
+          intentCopy.utterances[index].tags.push({
+            text: value.text,
+            tagName: "",
+            id: `tag_` + getId(),
+            startOffset: value.startOffset,
+            endOffset: value.endOffset,
+          });
+        }
+        const sortedIntent = intentCopy.utterances[index].tags.sort(
+          (a, b) => a.startOffset - b.startOffset
+        );
+        intentCopy.utterances[index].tags = [...sortedIntent];
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        setIntent(intentCopy);
       }
-      setIntent(intentCopy);
     }
   };
 
+  // attaching a tag to a selected word
   const handleAttachTag = (e, id, index) => {
     let indexValue = intent.utterances[index].tags.findIndex(
       (ele) => ele.id === id
     );
     let intentCopy = cloneDeep(intent);
-    intentCopy.utterances[index].tags[indexValue].tagName = e.target.value;
+    let tagFromPredefined = predefinedTags.find(
+      (ele) => ele.tagName === e.target.value
+    );
+    let newTag = intentCopy.utterances[index].tags[indexValue].new;
+
+    if (tagFromPredefined && !newTag) {
+      intentCopy.utterances[index].tags[indexValue].tagName =
+        tagFromPredefined.tagName;
+      intentCopy.utterances[index].tags[indexValue].color =
+        tagFromPredefined.color;
+    } else {
+      let tagName = e.target.value;
+      let color = getRandomColor();
+      intentCopy.utterances[index].tags[indexValue].tagName = tagName;
+      intentCopy.utterances[index].tags[indexValue].color = color;
+      intentCopy.utterances[index].tags[indexValue].new = false;
+      setPredefinedTags([
+        ...predefinedTags,
+        { tagName: tagName, color: color },
+      ]);
+    }
     setIntent(intentCopy);
   };
 
+  const debouncedAttachTag = debounce(handleAttachTag, 200);
+
+  // adding new intent
   const addIntent = () => {
+    // this part can be more optimized
     let updatedIntentList = cloneDeep(props.intentLibrary);
+    let updateSelectedIntent = cloneDeep(props.selectedIntent);
+
+    // check if intent already exist in intent library
     const i = updatedIntentList.findIndex(
       (_element) => _element.id === intent.id
     );
+    // if yes, update the intent library
     if (i > -1) {
       updatedIntentList[i] = intent;
     } else {
       updatedIntentList.push(intent);
     }
+
+    // check if intent already exist in selected intents
+    const selectedIndex = props.selectedIntent.findIndex(
+      (_element) => _element.id === intent.id
+    );
+    // if yes, update the selected intent
+    if (selectedIndex > -1) {
+      updateSelectedIntent[selectedIndex] = intent;
+    }
+
     props.updateIntentLibrary(updatedIntentList);
+    props.updateIntentList(updateSelectedIntent);
     handleDialogClose();
   };
 
@@ -129,6 +246,7 @@ export default function IntentSettings(props) {
     }));
   };
 
+  // delete an utterance in an intent
   const handleUtteranceDelete = (item) => {
     setIntent((prev) => ({
       ...prev,
@@ -136,13 +254,16 @@ export default function IntentSettings(props) {
         ...intent.utterances.filter((ele) => ele.name !== item.name),
       ],
     }));
+    utteranceDeleted.current = true;
   };
 
+  // delete an intent
   const handleDelete = (index) => {
     let newList = props.selectedIntent.filter((element, ind) => ind !== index);
     props.updateIntentList(newList);
   };
 
+  // push new intent in a list
   const handleAddNewIntent = () => {
     const newIntent = {
       id: "new",
@@ -152,30 +273,55 @@ export default function IntentSettings(props) {
     props.updateIntentList([...props.selectedIntent, newIntent]);
   };
 
-  const handleHighlightText = (e, ele, index) => {
-    if (ele.text && ele.tagName) {
-      let intentCopy = cloneDeep(intent);
-      if (intentCopy.utterances[index].highlightedText) {
-        intentCopy.utterances[index].highlightedText.push(ele.text);
-      } else {
-        intentCopy.utterances[index].highlightedText = [];
-        intentCopy.utterances[index].highlightedText.push(ele.text);
-      }
-      setIntent(intentCopy);
-    }
-  };
-
+  // delete a tag inside an utterance
   const handleTageDelete = (e, ele, index) => {
     let removeTag = intent.utterances[index].tags.filter(
       (tag) => tag.id !== ele.id
     );
-    let removeHighlightedText = intent.utterances[
-      index
-    ].highlightedText?.filter((tag) => tag !== ele.text);
     let intentCopy = cloneDeep(intent);
     intentCopy.utterances[index].tags = removeTag;
-    intentCopy.utterances[index].highlightedText = removeHighlightedText;
     setIntent(intentCopy);
+  };
+
+  // render a textfield on click of add new button
+  const handleAddNewTag = (e, id, index) => {
+    setIntent((prevState) => {
+      let intentCopy = cloneDeep(prevState);
+      let indexValue = intentCopy.utterances[index].tags.findIndex(
+        (ele) => ele.id === id
+      );
+      if (indexValue !== -1) {
+        intentCopy.utterances[index].tags[indexValue].new = true;
+      }
+      return intentCopy;
+    });
+  };
+
+  // add new tag to predefined tags
+  const handleAddToPredefinedTags = (e, id, index) => {
+    if (e.target.value) {
+      let tagFromPredefined = predefinedTags.find(
+        (ele) => ele.tagName.toLowerCase() === e.target.value.toLowerCase()
+      );
+      if (tagFromPredefined) {
+        alert("tag already exist in predefined tags");
+      } else {
+        let indexValue = intent.utterances[index].tags.findIndex(
+          (ele) => ele.id === id
+        );
+        let tagName = e.target.value;
+        let color = getRandomColor();
+        let intentCopy = cloneDeep(intent);
+        intentCopy.utterances[index].tags[indexValue].tagName = tagName;
+        intentCopy.utterances[index].tags[indexValue].color = color;
+        delete intentCopy.utterances[index].tags[indexValue].new;
+        setPredefinedTags([
+          ...predefinedTags,
+          { tagName: tagName, color: color },
+        ]);
+        setIntent(intentCopy);
+      }
+    }
   };
 
   return (
@@ -193,9 +339,12 @@ export default function IntentSettings(props) {
           addIntent={addIntent}
           handleUtteranceDelete={handleUtteranceDelete}
           handleAddTag={handleAddTag}
-          handleAttachTag={handleAttachTag}
-          handleHighlightText={handleHighlightText}
+          handleAttachTag={debouncedAttachTag}
           handleTageDelete={handleTageDelete}
+          utteranceDeleted={utteranceDeleted}
+          predefinedTags={predefinedTags}
+          handleAddNewTag={handleAddNewTag}
+          handleAddToPredefinedTags={handleAddToPredefinedTags}
         />
       )}
       {props.selectedIntent.map((ele, index) => {

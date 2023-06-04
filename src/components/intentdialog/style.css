@@ -15,10 +15,12 @@
 }
 
 .tag-side-panel {
-  min-width: 20%;
+  min-width: 400px;
   border-left: 1px solid #bdbdbd;
   margin-left: 20px;
   max-width: 400px;
+  padding-left: 20px;
+  height: 100vh;
 }
 
 .intent-header {
@@ -40,14 +42,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-left: 20px;
   padding-top: 10px;
   padding-bottom: 10px;
 
 }
 
 .tag-header {
-  padding: 20px;
+  padding: 20px 0px;
   font-size: 20px;
 }
 
@@ -64,4 +65,28 @@
   padding: 0px;
   min-width: 20px;
   padding-left: 10px;
+}
+
+.highlight-area {
+  border: 1px solid;
+  text-align: justify;
+  padding: 16px;
+  line-height: 24px;
+}
+
+.highlight-btn {
+  margin-left: auto !important;
+  margin-right: 0;
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.uttr-list {
+  text-align: justify;
+  width: 85%;
+}
+
+.tag-input {
+  min-width: 200px !important;
 }

@@ -18,7 +18,7 @@
     "react-highlight-words": "^0.18.0",
     "react-highlighter": "^0.4.3",
     "react-html-parser": "^2.0.2",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^3.0.1",
     "reactflow": "^11.3.0",
     "text-selection-react": "^1.1.8",
     "web-vitals": "^2.1.4"
